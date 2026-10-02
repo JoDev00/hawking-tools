@@ -6,24 +6,25 @@ from services import hawking_upload
 from pathlib import Path
 import time
 
+commands = {}
+
+def command(function):
+	commands[function.__name__]	= function
+	return function
+
+@command
+def test(authenticated_session, *args):
+	print(args)
+
 def main():
 	username = hawking_auth.get_username()
 	password = hawking_auth.get_password(username)
 	hawking_auth.authentication_flow(username, password)
 	authenticated_session = hawking_auth.get_authenticated_session(username, password)
 
-	''' Todo: command-based args
-	while True:
-		user_input = input(". ݁₊ ⊹ . ݁ Enter a command: ")
-		if user_input == "exit":
-			sys.exit()
-
-		command = user_input.split(" ")[0]
-
-		if command == "upload":
-			hawking_upload.bulk_upload(authenticated_session, Path(".").glob(user_input.split(" ")[1]))
-			time.sleep(1)
-	'''
+	cmd = sys.argv[1]
+	args = sys.argv[2:]
+	commands[cmd](authenticated_session, args)
 
 if __name__ == "__main__":
 	main()
