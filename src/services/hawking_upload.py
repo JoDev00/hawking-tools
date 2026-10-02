@@ -11,9 +11,7 @@ tasks_path = api_base + "/tasks"
 
 @cmd_registry.command
 def upload(authenticated_session, file):
-	print("upload example")
-	'''
-
+	file = file[0]
 	file_upload = {"file": open(file, "rb")}
 	module = services.hawking_tasks.get_module_from_task(authenticated_session, file)
 
@@ -30,7 +28,6 @@ def upload(authenticated_session, file):
 
 	if request.status_code == 200:
 		print(f"Successfully uploaded {file}!")
-	'''
 
 def bulk_upload(authenticated_session, files):
 	for file in files:
