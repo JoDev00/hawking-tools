@@ -2,17 +2,10 @@
 
 import sys
 import hawking_auth
+from core import cmd_registry
 from services import hawking_upload
-from pathlib import Path
-import time
 
-commands = {}
-
-def command(function):
-	commands[function.__name__]	= function
-	return function
-
-@command
+@cmd_registry.command
 def test(authenticated_session, *args):
 	print(args)
 
@@ -24,7 +17,7 @@ def main():
 
 	cmd = sys.argv[1]
 	args = sys.argv[2:]
-	commands[cmd](authenticated_session, args)
+	cmd_registry.commands[cmd](authenticated_session, args)
 
 if __name__ == "__main__":
 	main()
