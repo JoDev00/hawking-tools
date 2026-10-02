@@ -2,9 +2,12 @@
 
 import sys
 import hawking_auth
+from core import cmd_registry
 from services import hawking_upload
-from pathlib import Path
-import time
+
+@cmd_registry.command
+def test(authenticated_session, *args):
+	print(args)
 
 def main():
 	username = hawking_auth.get_username()
@@ -12,22 +15,9 @@ def main():
 	hawking_auth.authentication_flow(username, password)
 	authenticated_session = hawking_auth.get_authenticated_session(username, password)
 
-	print("To view available commands, type 'help'.")
-
-	while True:
-		user_input = input(". ݁₊ ⊹ . ݁ Enter a command: ")
-		if user_input == "exit":
-			sys.exit()
-
-		command = user_input.split(" ")[0]
-
-		if command == "upload":
-			hawking_upload.bulk_upload(authenticated_session, Path(".").glob(user_input.split(" ")[1]))
-			time.sleep(1)
-
-def print_file(file):
-	with open(file, "r") as f:
-		print(f"\n{ f.read() }\n")
+	cmd = sys.argv[1]
+	args = sys.argv[2:]
+	cmd_registry.commands[cmd](authenticated_session, args)
 
 if __name__ == "__main__":
 	main()
