@@ -20,7 +20,6 @@ def upload(authenticated_session, file):
 	print(f"Uploading {file}...")
 	try:
 		request = authenticated_session.post(f"{upload_url}/{module}/{file}", files=file_upload, timeout=10)
-		print(request.text)
 		services.hawking_tasks.display_task_info(request.text)
 	except requests.exceptions.ReadTimeout:
 		print("Request timed out while uploading {file}. Try again.")
