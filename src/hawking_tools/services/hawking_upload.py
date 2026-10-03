@@ -14,11 +14,11 @@ tasks_path = api_base + "/tasks"
 def upload_file(authenticated_session, file):
 	with open(file, "rb") as file_handle:
 		file_upload = {"file": file_handle}
+		
 		module = hawking_tasks.get_module_from_task(authenticated_session, file)
 
 		filename = Path(file).name
 
-		print(f"Uploading {filename}...")
 		try:
 			request = authenticated_session.post(f"{upload_url}/{module}/{filename}", files=file_upload, timeout=10)
 			print(request.json())

@@ -9,12 +9,37 @@ from pygments.formatters import TerminalFormatter
 from pygments.lexers import guess_lexer
 from termcolor import cprint
 
+from ..core import hawking_state
+
 api_base = "https://hawking.computing.dcu.ie/api"
 module_for_task = api_base + "/moduleForTask"
 
 
+def select_module_from_task(module_id):
+	for i, module in enumerate(module_id):
+		print(f"{i + 1}. {module['banner']} (ID: {module['id']})")
+	selected_index = int(input("Enter the number of the correct module: ")) - 1
+	return module_id[selected_index]["id"]
+
 def get_module_from_task(authenticated_session, task):
-	return authenticated_session.get(f"{module_for_task}/{Path(task).name}").json()[0].get("id")
+	module_id = authenticated_session.get(f"{module_for_task}/{Path(task).name}").json()
+
+	if hawking_state.get_current_module(authenticated_session.auth[0]) is not None:
+		current_module = hawking_state.get_current_module(authenticated_session.auth[0])
+		for module in module_id:
+			if module["banner"] == current_module:
+				return module["id"]
+		print(f"Current module '{current_module}' does not match any modules for {task}. Please select the correct module from the following list:")
+		return select_module_from_task(module_id)
+
+	if len(module_id) > 1:
+		print(f"Multiple modules found for {task}. \n Please select the correct module from the following list:")
+		return select_module_from_task(module_id)
+	elif len(module_id) == 1:
+		return module_id[0]["id"]
+	else:
+		print(f"No module found for {task}. Please check the task name and try again.")
+		return None
 
 
 def display_task_info(response):
