@@ -4,7 +4,7 @@ from pathlib import Path
 
 import requests
 
-from . import hawking_tasks
+from hawking_tools.services import hawking_tasks
 
 api_base = "https://hawking.computing.dcu.ie/api"
 upload_url = api_base + "/upload"
