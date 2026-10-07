@@ -4,9 +4,10 @@ import sys
 import time
 from pathlib import Path
 
-from .core import hawking_auth
-from .services import hawking_upload
-from .core import hawking_state
+from hawking_tools.core import hawking_auth
+from hawking_tools.services import hawking_upload
+from hawking_tools.core import hawking_state
+from hawking_tools.services import hawking_tasks
 
 def main():
 	username = hawking_auth.get_username()
@@ -14,8 +15,8 @@ def main():
 	hawking_auth.authentication_flow(username, password)
 	authenticated_session = hawking_auth.get_authenticated_session(username, password)
 
-	print("To view available commands, type 'help'.")
-
+#	print("To view available commands, type 'help'.")
+	print("Usage: upload [FILE] or type exit to quit") # temp statement till we get help working
 	while True:
 		user_input = input(". ݁₊ ⊹ . ݁ Enter a command: ")
 		if user_input == "exit":
@@ -25,13 +26,18 @@ def main():
 
 		if command == "upload":
 			if len(user_input.split(" ")) < 2:
-				print("Please provide a file to upload.")
-				continue
-			files = list(Path(".").glob(user_input.split(" ")[1]))
+				latest = hawking_tasks.get_latest_file(authenticated_session)
+				if latest is None:
+					continue
+				
+				print(f'Uploading latest task file: {latest.name}')
+				files = [latest]
+			else:
+				files = list(Path(".").glob(user_input.split(" ")[1]))
 
-			if not files:
-				print(f"File '{user_input.split(' ')[1]}' not found.")
-				continue
+				if not files:
+					print(f"File '{user_input.split(' ')[1]}' not found.")
+					continue
 			
 			hawking_upload.bulk_upload(authenticated_session, files)
 			time.sleep(1)

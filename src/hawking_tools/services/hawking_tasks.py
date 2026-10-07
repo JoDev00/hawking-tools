@@ -9,10 +9,11 @@ from pygments.formatters import TerminalFormatter
 from pygments.lexers import guess_lexer
 from termcolor import cprint
 
-from ..core import hawking_state
+from hawking_tools.core import hawking_state
 
 api_base = "https://hawking.computing.dcu.ie/api"
 module_for_task = api_base + "/moduleForTask"
+tasks_url = api_base + "/tasks" # finds tasks for every module
 
 
 def select_module_from_task(module_id):
@@ -63,3 +64,29 @@ def display_task_info(response):
 		cprint(f"actual stdout: {result['stdout'].strip()}", color)
 		cprint(f"stderr: {result['stderr'].strip()}", color)
 		print("-" * 30)
+
+def get_tasks(auth_session):
+	response = auth_session.get(tasks_url, timeout=10)
+	if response.status_code != 200:
+		print(f'Error fetching tasks: {response.reason}')
+		return None
+	
+	data = response.json()
+	if isinstance(data, dict) and "error" in data:
+		print(f'Error fetching tasks: {data['error']}')
+		return None
+	
+	return set(data)
+
+def get_latest_file(auth_session, directory="."):
+	tasks = get_tasks(auth_session)
+	if tasks is None:
+		return None
+
+	candidates = [p for p in Path(directory).iterdir() if p.is_file() and p.name in tasks]
+	if not candidates:
+		print("You have no tasks in this folder to upload")
+		return None
+	
+	return max(candidates, key=lambda p: p.stat().st_mtime)
+	
