@@ -3,3 +3,5 @@ assignments/
 src/local_testing/
 .DS_Store
 *.un~
+build/
+dist/
